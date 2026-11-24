@@ -1,14 +1,13 @@
 
 name: Forgroup Notifier
 
-concurrency:
-  group: forgroup-notifier
-  cancel-in-progress: false
-
 on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-bot:
@@ -23,22 +22,20 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore video state
-        uses: actions/cache/restore@v4
-        with:
-          path: last-video.txt
-          key: forgroup-video-state-${{ github.run_id }}
-          restore-keys: |
-            forgroup-video-state-
-
       - name: Run bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: dotnet run --configuration Release
 
       - name: Save video state
-        if: success()
-        uses: actions/cache/save@v4
-        with:
-          path: last-video.txt
-          key: forgroup-video-state-${{ github.run_id }}
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add last-video.txt
+          if git diff --cached --quiet; then
+            echo "Nothing to save"
+          else
+            git commit -m "Update last video"
+            git push
+          fi
