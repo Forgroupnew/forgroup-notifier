@@ -26,15 +26,17 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: dotnet run --configuration Release
 
+      
       - name: Save video state
-        if: always()
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add last-video.txt
           if git diff --cached --quiet; then
             echo "Nothing to save"
           else
             git commit -m "Update last video"
-            git push
+            git push origin HEAD:main
           fi
