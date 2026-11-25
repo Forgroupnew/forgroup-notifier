@@ -1,10 +1,9 @@
 
-
 name: Forgroup Notifier
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 permissions:
